@@ -1,4 +1,5 @@
 //! Cryptographic signing and verification for Prompt Fencing.
+#![allow(clippy::useless_conversion)]
 //!
 //! Implements Ed25519 signatures with SHA-256 hashing per the paper:
 //! - σ = Sign(SK, H(C || M_canonical))
@@ -10,7 +11,7 @@ use pyo3::prelude::*;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
 
-use crate::fence::{Fence, FenceMetadata, FenceRating, FenceType, parse_fence_xml};
+use crate::fence::{parse_fence_xml, Fence, FenceMetadata, FenceRating, FenceType};
 
 /// Errors related to cryptographic operations.
 #[derive(Error, Debug)]
@@ -160,11 +161,9 @@ pub fn verify_fence(
     fence_xml: String,
     public_key: String,
 ) -> PyResult<(bool, String, String, String, String, String)> {
-    let (content, metadata, signature) =
-        parse_fence_xml(&fence_xml).map_err(|e| PyErr::from(e))?;
+    let (content, metadata, signature) = parse_fence_xml(&fence_xml)?;
 
-    let valid = verify_signature(&content, &metadata, &signature, &public_key)
-        .unwrap_or(false);
+    let valid = verify_signature(&content, &metadata, &signature, &public_key).unwrap_or(false);
 
     Ok((
         valid,
@@ -182,18 +181,16 @@ pub fn verify_fence(
 #[pyfunction]
 pub fn verify_all_fences(prompt: String, public_key: String) -> PyResult<bool> {
     let fences = extract_fence_xmls(&prompt);
-    
+
     if fences.is_empty() {
         return Ok(false); // No fences found
     }
 
     for fence_xml in fences {
-        let (content, metadata, signature) = parse_fence_xml(&fence_xml)
-            .map_err(|e| PyErr::from(e))?;
-        
-        let valid = verify_signature(&content, &metadata, &signature, &public_key)
-            .unwrap_or(false);
-        
+        let (content, metadata, signature) = parse_fence_xml(&fence_xml)?;
+
+        let valid = verify_signature(&content, &metadata, &signature, &public_key).unwrap_or(false);
+
         if !valid {
             return Ok(false);
         }
@@ -259,11 +256,11 @@ mod tests {
     #[test]
     fn test_generate_keypair() {
         let (private_key, public_key) = generate_keypair();
-        
+
         // Keys should be base64 encoded
         let priv_bytes = BASE64.decode(&private_key).unwrap();
         let pub_bytes = BASE64.decode(&public_key).unwrap();
-        
+
         assert_eq!(priv_bytes.len(), 32);
         assert_eq!(pub_bytes.len(), 32);
     }
@@ -271,7 +268,7 @@ mod tests {
     #[test]
     fn test_sign_and_verify() {
         let (private_key, public_key) = generate_keypair();
-        
+
         let content = "Test content";
         let metadata = FenceMetadata::new(
             FenceType::Instructions,
@@ -282,14 +279,14 @@ mod tests {
 
         let signature = sign_content(content, &metadata, &private_key).unwrap();
         let valid = verify_signature(content, &metadata, &signature, &public_key).unwrap();
-        
+
         assert!(valid);
     }
 
     #[test]
     fn test_tampered_content_fails() {
         let (private_key, public_key) = generate_keypair();
-        
+
         let content = "Original content";
         let metadata = FenceMetadata::new(
             FenceType::Content,
@@ -299,10 +296,11 @@ mod tests {
         );
 
         let signature = sign_content(content, &metadata, &private_key).unwrap();
-        
+
         // Verify with tampered content
-        let valid = verify_signature("Tampered content", &metadata, &signature, &public_key).unwrap();
-        
+        let valid =
+            verify_signature("Tampered content", &metadata, &signature, &public_key).unwrap();
+
         assert!(!valid);
     }
 
@@ -310,7 +308,7 @@ mod tests {
     fn test_extract_fence_xmls() {
         let prompt = r#"<sec:fence rating="trusted" signature="abc" source="sys" timestamp="2025" type="instructions">Hello</sec:fence>
 <sec:fence rating="untrusted" signature="def" source="user" timestamp="2025" type="content">World</sec:fence>"#;
-        
+
         let fences = extract_fence_xmls(prompt);
         assert_eq!(fences.len(), 2);
         assert!(fences[0].contains("Hello"));

@@ -1,4 +1,5 @@
 //! Fence metadata model and canonicalization rules.
+#![allow(clippy::useless_conversion)]
 //!
 //! Implements the fence structure from the Prompt Fencing paper:
 //! - FenceType: instructions | content | data
@@ -47,21 +48,27 @@ pub enum FenceType {
     Data,
 }
 
+use std::str::FromStr;
+
+impl FromStr for FenceType {
+    type Err = FenceError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "instructions" => Ok(FenceType::Instructions),
+            "content" => Ok(FenceType::Content),
+            "data" => Ok(FenceType::Data),
+            _ => Err(FenceError::InvalidType(s.to_string())),
+        }
+    }
+}
+
 impl FenceType {
     pub fn as_str(&self) -> &'static str {
         match self {
             FenceType::Instructions => "instructions",
             FenceType::Content => "content",
             FenceType::Data => "data",
-        }
-    }
-
-    pub fn from_str(s: &str) -> Result<Self, FenceError> {
-        match s.to_lowercase().as_str() {
-            "instructions" => Ok(FenceType::Instructions),
-            "content" => Ok(FenceType::Content),
-            "data" => Ok(FenceType::Data),
-            _ => Err(FenceError::InvalidType(s.to_string())),
         }
     }
 }
@@ -77,7 +84,7 @@ impl FenceType {
     #[staticmethod]
     #[pyo3(name = "from_str")]
     fn py_from_str(s: &str) -> PyResult<Self> {
-        Self::from_str(s).map_err(|e| e.into())
+        Ok(Self::from_str(s)?)
     }
 
     fn __str__(&self) -> String {
@@ -110,8 +117,12 @@ impl FenceRating {
             FenceRating::PartiallyTrusted => "partially-trusted",
         }
     }
+}
 
-    pub fn from_str(s: &str) -> Result<Self, FenceError> {
+impl FromStr for FenceRating {
+    type Err = FenceError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "trusted" => Ok(FenceRating::Trusted),
             "untrusted" => Ok(FenceRating::Untrusted),
@@ -132,7 +143,7 @@ impl FenceRating {
     #[staticmethod]
     #[pyo3(name = "from_str")]
     fn py_from_str(s: &str) -> PyResult<Self> {
-        Self::from_str(s).map_err(|e| e.into())
+        Ok(Self::from_str(s)?)
     }
 
     fn __str__(&self) -> String {
@@ -169,9 +180,7 @@ impl FenceMetadata {
         source: String,
         timestamp: Option<String>,
     ) -> Self {
-        let timestamp = timestamp.unwrap_or_else(|| {
-            chrono_lite_iso8601_now()
-        });
+        let timestamp = timestamp.unwrap_or_else(chrono_lite_iso8601_now);
         FenceMetadata {
             fence_type,
             rating,
@@ -290,15 +299,15 @@ fn chrono_lite_iso8601_now() -> String {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default();
     let secs = duration.as_secs();
-    
+
     // Convert to datetime components (simplified, assumes UTC)
     let days_since_epoch = secs / 86400;
     let time_of_day = secs % 86400;
-    
+
     // Calculate year, month, day (simplified leap year handling)
     let mut year = 1970i32;
     let mut remaining_days = days_since_epoch as i32;
-    
+
     loop {
         let days_in_year = if is_leap_year(year) { 366 } else { 365 };
         if remaining_days < days_in_year {
@@ -307,13 +316,13 @@ fn chrono_lite_iso8601_now() -> String {
         remaining_days -= days_in_year;
         year += 1;
     }
-    
+
     let days_in_months: [i32; 12] = if is_leap_year(year) {
         [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     } else {
         [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     };
-    
+
     let mut month = 1u32;
     for days in days_in_months.iter() {
         if remaining_days < *days {
@@ -323,12 +332,12 @@ fn chrono_lite_iso8601_now() -> String {
         month += 1;
     }
     let day = remaining_days + 1;
-    
+
     let hours = time_of_day / 3600;
     let minutes = (time_of_day % 3600) / 60;
     let seconds = time_of_day % 60;
     let millis = duration.subsec_millis();
-    
+
     format!(
         "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03}Z",
         year, month, day, hours, minutes, seconds, millis
@@ -346,36 +355,36 @@ pub fn parse_fence_xml(xml: &str) -> Result<(String, FenceMetadata, String), Fen
     let start_tag_end = xml
         .find('>')
         .ok_or_else(|| FenceError::InvalidXml("Missing closing bracket".to_string()))?;
-    
+
     let tag_content = &xml[..start_tag_end];
-    
+
     // Verify it's a sec:fence tag
     if !tag_content.starts_with("<sec:fence ") {
         return Err(FenceError::InvalidXml("Not a sec:fence tag".to_string()));
     }
-    
+
     // Extract attributes
     let signature = extract_attr(tag_content, "signature")?;
     let fence_type = FenceType::from_str(&extract_attr(tag_content, "type")?)?;
     let rating = FenceRating::from_str(&extract_attr(tag_content, "rating")?)?;
     let source = extract_attr(tag_content, "source").unwrap_or_default();
     let timestamp = extract_attr(tag_content, "timestamp").unwrap_or_default();
-    
+
     // Extract content between tags
     let content_start = start_tag_end + 1;
     let content_end = xml
         .rfind("</sec:fence>")
         .ok_or_else(|| FenceError::InvalidXml("Missing closing tag".to_string()))?;
-    
+
     let content = xml_unescape(&xml[content_start..content_end]);
-    
+
     let metadata = FenceMetadata {
         fence_type,
         rating,
         source,
         timestamp,
     };
-    
+
     Ok((content, metadata, signature))
 }
 
@@ -398,7 +407,10 @@ mod tests {
 
     #[test]
     fn test_fence_type_roundtrip() {
-        assert_eq!(FenceType::from_str("instructions").unwrap(), FenceType::Instructions);
+        assert_eq!(
+            FenceType::from_str("instructions").unwrap(),
+            FenceType::Instructions
+        );
         assert_eq!(FenceType::from_str("content").unwrap(), FenceType::Content);
         assert_eq!(FenceType::from_str("data").unwrap(), FenceType::Data);
         assert_eq!(FenceType::Instructions.as_str(), "instructions");
@@ -406,9 +418,18 @@ mod tests {
 
     #[test]
     fn test_fence_rating_roundtrip() {
-        assert_eq!(FenceRating::from_str("trusted").unwrap(), FenceRating::Trusted);
-        assert_eq!(FenceRating::from_str("untrusted").unwrap(), FenceRating::Untrusted);
-        assert_eq!(FenceRating::from_str("partially-trusted").unwrap(), FenceRating::PartiallyTrusted);
+        assert_eq!(
+            FenceRating::from_str("trusted").unwrap(),
+            FenceRating::Trusted
+        );
+        assert_eq!(
+            FenceRating::from_str("untrusted").unwrap(),
+            FenceRating::Untrusted
+        );
+        assert_eq!(
+            FenceRating::from_str("partially-trusted").unwrap(),
+            FenceRating::PartiallyTrusted
+        );
     }
 
     #[test]
