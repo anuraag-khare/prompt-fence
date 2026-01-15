@@ -82,7 +82,7 @@ jobs:
   # Build wheels for macOS (Intel) - for backwards compatibility
   build-macos-intel:
     name: Build macOS Intel wheels
-    runs-on: macos-13  # Intel runner
+    runs-on: macos-14
     strategy:
       fail-fast: false
       matrix:
