@@ -337,15 +337,11 @@ For local development and testing:
 ```bash
 cd python/
 
-# Create virtual environment
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install build tool
-uv pip install maturin
+# Using uv (required)
+uv sync
 
 # Build and install in development mode
-maturin develop
+uv run maturin develop
 ```
 
 This compiles the Rust code and installs it in your virtual environment. Changes to Python files take effect immediately, but Rust changes require re-running `maturin develop`.
@@ -386,7 +382,7 @@ The simplest way. Just send the `.whl` file to someone:
 
 ```bash
 # They install it with:
-pip install prompt_fence-0.1.0-cp39-cp39-macosx_11_0_arm64.whl
+uv pip install prompt_fence-0.1.0-cp39-cp39-macosx_11_0_arm64.whl
 ```
 
 **Limitation:** They need the exact matching platform and Python version.
@@ -448,8 +444,6 @@ maturin upload ../rust/target/wheels/*
 #### Step 5: Users Install Your Package
 
 ```bash
-pip install prompt-fence
-# or
 uv pip install prompt-fence
 ```
 
@@ -467,7 +461,7 @@ maturin publish --repository-url https://your-private-pypi.com/simple/
 Users can install directly from your repository:
 
 ```bash
-pip install git+https://github.com/yourusername/prompt-fence-sdk.git
+uv pip install git+https://github.com/yourusername/prompt-fence-sdk.git
 ```
 
 **Note:** This requires users to have Rust installed since it builds from source.
@@ -577,14 +571,13 @@ response = llm.invoke(prompt.to_plain_string())
 ```bash
 # Setup
 cd python/
-uv venv && source .venv/bin/activate
-uv pip install maturin pytest ruff mypy
+uv sync
 
 # Development
-maturin develop          # Build and install locally
-pytest tests/            # Run tests
-ruff check prompt_fence/  # Lint code
-mypy prompt_fence/     # Type check
+uv run maturin develop          # Build and install locally
+uv run pytest tests/            # Run tests
+uv run ruff check prompt_fence/  # Lint code
+uv run mypy prompt_fence/     # Type check
 
 # Release
 maturin build --release  # Build wheel

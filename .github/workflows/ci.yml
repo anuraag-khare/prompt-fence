@@ -21,28 +21,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install maturin
-        run: pip install maturin
+      - name: Install dependencies
+        working-directory: python
+        run: uv sync --python ${{ matrix.python-version }}
 
       - name: Build and install package
         working-directory: python
-        run: maturin develop --release
-
-      - name: Install test dependencies
-        working-directory: python
-        run: pip install pytest pytest-cov
+        run: uv run maturin develop --release
 
       - name: Run tests
         working-directory: python
-        run: pytest tests/ -v --cov=prompt_fence --cov-report=xml
+        run: uv run pytest tests/ -v --cov=prompt_fence --cov-report=xml
 
       - name: Upload coverage
         if: matrix.python-version == '3.12'
@@ -57,21 +55,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
-      - name: Install linting tools
-        run: pip install ruff mypy
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: python
+        run: uv sync --python 3.12
 
       - name: Run ruff check
         working-directory: python
-        run: ruff check prompt_fence/ tests/
+        run: uv run ruff check prompt_fence/ tests/
 
       - name: Run ruff format check
         working-directory: python
-        run: ruff format --check prompt_fence/ tests/
+        run: uv run ruff format --check prompt_fence/ tests/
 
   rust-check:
     name: Rust Check

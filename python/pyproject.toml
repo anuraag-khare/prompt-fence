@@ -77,3 +77,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "prompt_fence._core"
 ignore_missing_imports = true
+
+[dependency-groups]
+dev = [
+    "maturin>=1.11.5",
+]
