@@ -10,7 +10,7 @@ name = "prompt_fence_core"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-pyo3 = { version = "0.22", features = ["extension-module"] }
+pyo3 = { version = "0.24", features = ["extension-module"] }
 ed25519-dalek = { version = "2.1", features = ["rand_core"] }
 sha2 = "0.10"
 base64 = "0.22"
