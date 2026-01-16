@@ -95,6 +95,25 @@ private_key, public_key = generate_keypair()
 # public_key: Base64-encoded Ed25519 public key (share with validators)
 ```
 
+### Manual Key Generation
+
+If you prefer to generate keys without using the library in your application (e.g., for setting up CI/CD secrets), you can use the library's utility function in a script to print valid keys:
+
+```bash
+# Generate both keys (Base64 encoded)
+python3 -c "from prompt_fence import generate_keypair; private, public = generate_keypair(); print(f'Private: {private}\nPublic:  {public}')"
+```
+
+Set these as environment variables to use them automatically:
+
+```bash
+export PROMPT_FENCE_PRIVATE_KEY="<your_private_key>"
+export PROMPT_FENCE_PUBLIC_KEY="<your_public_key>"
+```
+
+-   `PROMPT_FENCE_PRIVATE_KEY`: Automatically used by `PromptBuilder.build()`
+-   `PROMPT_FENCE_PUBLIC_KEY`: Automatically used by `validate()` and `validate_fence()`
+
 ### Building Prompts
 
 ```python

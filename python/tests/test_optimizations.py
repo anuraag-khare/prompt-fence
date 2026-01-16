@@ -64,6 +64,28 @@ class TestOptimizations:
         finally:
             del os.environ["PROMPT_FENCE_PRIVATE_KEY"]
 
+    def test_public_key_env_var(self):
+        from prompt_fence import validate
+        
+        # Unset just in case
+        if "PROMPT_FENCE_PUBLIC_KEY" in os.environ:
+            del os.environ["PROMPT_FENCE_PUBLIC_KEY"]
+            
+        prompt = PromptBuilder().trusted_instructions("Foo").build(self.private_key)
+        prompt_str = prompt.to_plain_string()
+        
+        # Should raise ValueError if no key provided
+        with pytest.raises(ValueError, match="Public key must be provided"):
+            validate(prompt_str)
+            
+        # Set env var
+        os.environ["PROMPT_FENCE_PUBLIC_KEY"] = self.public_key
+        
+        try:
+            assert validate(prompt_str)
+        finally:
+            del os.environ["PROMPT_FENCE_PUBLIC_KEY"]
+
     def test_segment_properties(self):
         builder = PromptBuilder()
         builder.trusted_instructions("Trusted")

@@ -74,6 +74,26 @@ prompt = (
 # 4. Validate at gateway
 if not validate(prompt.to_plain_string(), public_key):
     raise SecurityError("Invalid fence signatures!")
+    raise SecurityError("Invalid fence signatures!")
+```
+
+### Manual Key Generation
+ 
+You can generate valid keys for environment configuration using the library's utility:
+ 
+```bash
+# Generate keypair
+python3 -c "from prompt_fence import generate_keypair; print(generate_keypair())"
+```
+ 
+Set environment variables:
+ 
+```bash
+export PROMPT_FENCE_PRIVATE_KEY="<private_key>"
+export PROMPT_FENCE_PUBLIC_KEY="<public_key>"
+```
+ 
+These are automatically picked up by `PromptBuilder` and `validate()`.
 ```
 
 ## Development & Testing
