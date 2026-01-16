@@ -130,17 +130,25 @@ class TestPromptBuilder:
         assert validate(prompt_str, public_key)
 
     def test_build_without_awareness(self):
-        from prompt_fence import PromptBuilder, generate_keypair
+        from prompt_fence import (
+            PromptBuilder,
+            generate_keypair,
+            get_awareness_instructions,
+            set_awareness_instructions,
+        )
 
         private_key, _ = generate_keypair()
 
-        prompt = (
-            PromptBuilder(prepend_awareness=False).trusted_instructions("Test").build(private_key)
-        )
+        original = get_awareness_instructions()
+        try:
+            set_awareness_instructions("")
+            prompt = PromptBuilder().trusted_instructions("Test").build(private_key)
 
-        prompt_str = prompt.to_plain_string()
-        assert "CRITICAL SECURITY RULES" not in prompt_str
-        assert "<sec:fence" in prompt_str
+            prompt_str = prompt.to_plain_string()
+            assert "CRITICAL SECURITY RULES" not in prompt_str
+            assert "<sec:fence" in prompt_str
+        finally:
+            set_awareness_instructions(original)
 
     def test_multiple_segments(self):
         from prompt_fence import PromptBuilder, generate_keypair, validate
@@ -148,7 +156,7 @@ class TestPromptBuilder:
         private_key, public_key = generate_keypair()
 
         prompt = (
-            PromptBuilder(prepend_awareness=False)
+            PromptBuilder()
             .trusted_instructions("Instruction 1")
             .trusted_instructions("Instruction 2")
             .untrusted_content("User content 1")
@@ -168,7 +176,7 @@ class TestValidation:
         private_key, public_key = generate_keypair()
 
         prompt = (
-            PromptBuilder(prepend_awareness=False)
+            PromptBuilder()
             .trusted_instructions("Instruction")
             .untrusted_content("Content")
             .build(private_key)
@@ -181,11 +189,7 @@ class TestValidation:
 
         private_key, public_key = generate_keypair()
 
-        prompt = (
-            PromptBuilder(prepend_awareness=False)
-            .trusted_instructions("Original instruction")
-            .build(private_key)
-        )
+        prompt = PromptBuilder().trusted_instructions("Original instruction").build(private_key)
 
         # Tamper with the prompt
         tampered = prompt.to_plain_string().replace("Original", "Malicious")
@@ -211,11 +215,7 @@ class TestXMLEscaping:
 
         special_content = 'Test with <script>alert("xss")</script> & "quotes"'
 
-        prompt = (
-            PromptBuilder(prepend_awareness=False)
-            .untrusted_content(special_content)
-            .build(private_key)
-        )
+        prompt = PromptBuilder().untrusted_content(special_content).build(private_key)
 
         prompt_str = prompt.to_plain_string()
 

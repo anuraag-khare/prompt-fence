@@ -1,5 +1,12 @@
 # Prompt Fence SDK
 
+[![PyPI version](https://badge.fury.io/py/prompt-fence.svg)](https://badge.fury.io/py/prompt-fence)
+[![CI](https://github.com/anuraag-khare/prompt-fence/actions/workflows/ci.yml/badge.svg)](https://github.com/anuraag-khare/prompt-fence/actions/workflows/ci.yml)
+[![Python Versions](https://img.shields.io/pypi/pyversions/prompt-fence.svg)](https://pypi.org/project/prompt-fence/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/prompt-fence)](https://pepy.tech/project/prompt-fence)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 A Python SDK for establishing cryptographic security boundaries in LLM prompts, based on the [Prompt Fence paper](https://arxiv.org/abs/2511.19727).
 
 ## Overview
@@ -13,6 +20,16 @@ Prompt Fence provides cryptographically signed segments within LLM prompts to:
 The SDK uses Ed25519 signatures with SHA-256 hashing, implemented in Rust for performance.
 
 ## Installation
+
+## Installation
+
+### From PyPI
+
+```bash
+pip install prompt-fence
+# or
+uv add prompt-fence
+```
 
 ### From Source (Development)
 
@@ -55,10 +72,10 @@ uv run maturin build --release --target x86_64-unknown-linux-gnu
 ```python
 from prompt_fence import PromptBuilder, generate_keypair, validate
 
-# Generate signing keys (store private key securely!)
+# 1. Generate keys (store private key securely!)
 private_key, public_key = generate_keypair()
 
-# Build a fenced prompt
+# 2. Build a fenced prompt
 prompt = (
     PromptBuilder()
     .trusted_instructions(
@@ -72,10 +89,10 @@ prompt = (
     .build(private_key)
 )
 
-# Use with any LLM SDK
+# 3. Use with any LLM SDK
 response = your_llm_client.generate(prompt.to_plain_string())
 
-# Security gateway: validate before processing
+# 4. Security gateway: validate before processing
 if validate(prompt.to_plain_string(), public_key):
     # All signatures valid, safe to process
     pass
@@ -95,12 +112,35 @@ private_key, public_key = generate_keypair()
 # public_key: Base64-encoded Ed25519 public key (share with validators)
 ```
 
+### Manual Key Generation
+
+If you prefer to generate keys without using the library in your application (e.g., for setting up CI/CD secrets), you can use the library's utility function in a script to print valid keys:
+
+```bash
+# Generate both keys (Base64 encoded)
+python3 -c "from prompt_fence import generate_keypair; private, public = generate_keypair(); print(f'Private: {private}\nPublic:  {public}')"
+```
+
+Set these as environment variables to use them automatically:
+
+```bash
+export PROMPT_FENCE_PRIVATE_KEY="<your_private_key>"
+export PROMPT_FENCE_PUBLIC_KEY="<your_public_key>"
+```
+
+-   `PROMPT_FENCE_PRIVATE_KEY`: Automatically used by `PromptBuilder.build()`
+-   `PROMPT_FENCE_PUBLIC_KEY`: Automatically used by `validate()` and `validate_fence()`
+
 ### Building Prompts
 
 ```python
+import os
 from prompt_fence import PromptBuilder
 
-builder = PromptBuilder(prepend_awareness=True)  # Auto-adds fence instructions
+# Optional: Set key in environment variable
+os.environ["PROMPT_FENCE_PRIVATE_KEY"] = "..."
+
+builder = PromptBuilder()
 
 # Add trusted instructions (type="instructions", rating="trusted")
 builder.trusted_instructions("Your system prompt here", source="system")
@@ -115,7 +155,8 @@ builder.partially_trusted_content("Partner API data", source="partner_api")
 builder.data_segment("JSON data...", rating=FenceRating.UNTRUSTED, source="db")
 
 # Build with signature
-prompt = builder.build(private_key)
+# If PROMPT_FENCE_PRIVATE_KEY is set, argument is optional
+prompt = builder.build(private_key) 
 ```
 
 ### FencedPrompt Object
@@ -131,6 +172,9 @@ len(prompt)    # Length of prompt string
 llm_response = some_sdk.call(prompt.to_plain_string())
 
 # Inspect segments
+print(f"Trusted segments: {len(prompt.trusted_segments)}")
+print(f"Untrusted segments: {len(prompt.untrusted_segments)}")
+
 for segment in prompt.segments:
     print(f"Type: {segment.fence_type}")
     print(f"Rating: {segment.rating}")
@@ -140,55 +184,39 @@ for segment in prompt.segments:
 ### Validation
 
 ```python
-from prompt_fence import validate, validate_fence
+from prompt_fence import validate, validate_fence, FenceError
 
-# Validate entire prompt (all fences must pass)
-is_valid = validate(prompt_string, public_key)
+try:
+    # Validate entire prompt (all fences must pass)
+    is_valid = validate(prompt_string, public_key)
 
-# Validate single fence and extract data
-result = validate_fence(fence_xml, public_key)
-if result.valid:
-    print(f"Content: {result.content}")
-    print(f"Rating: {result.rating}")
+    # Validate single fence and extract data
+    result = validate_fence(fence_xml, public_key)
+    if result.valid:
+        print(f"Content: {result.content}")
+        print(f"Rating: {result.rating}")
+
+except FenceError as e:
+    print(f"Verification error: {e}")
 ```
-
-## Fence XML Format
-
-The SDK generates XML fences per the paper specification:
-
-```xml
-<sec:fence rating="trusted" signature="MEYCIQDx5w2l7..." 
-           source="system" timestamp="2025-01-15T10:30:00.000Z" 
-           type="instructions">
-Your trusted instructions here...
-</sec:fence>
-
-<sec:fence rating="untrusted" signature="MEYCIQCy7a8m9..." 
-           source="user_upload" timestamp="2025-01-15T10:30:01.000Z" 
-           type="content">
-Untrusted user content here...
-</sec:fence>
-```
-
-Attributes are sorted alphabetically for deterministic signature computation.
-
-## Security Model
-
-1. **Fence Generation**: Application code fences content with appropriate trust ratings
-2. **Signing**: Each fence is cryptographically signed using Ed25519
-3. **Validation**: Security gateway verifies all signatures before LLM processing
-4. **LLM Processing**: Model respects fence boundaries (native or via awareness instructions)
-
-Per the paper: "If any fence fails verification, the entire prompt is rejected."
 
 ## Configuration
 
-### Disable Awareness Instructions
+### Global Awareness Instructions
 
-For LLMs with native fence support:
+The SDK automatically prepends security instructions to make the LLM "fence-aware". You can customize or disable this globally.
 
 ```python
-builder = PromptBuilder(prepend_awareness=False)
+from prompt_fence import set_awareness_instructions, get_awareness_instructions
+
+# Check current instructions
+print(get_awareness_instructions())
+
+# Override with custom instructions
+set_awareness_instructions("My custom security rules...")
+
+# Disable awareness instructions (e.g., if LLM has native support)
+set_awareness_instructions("")
 ```
 
 ### Custom Timestamps

@@ -1,5 +1,12 @@
 # Prompt Fence
 
+[![PyPI version](https://badge.fury.io/py/prompt-fence.svg)](https://badge.fury.io/py/prompt-fence)
+[![CI](https://github.com/anuraag-khare/prompt-fence/actions/workflows/ci.yml/badge.svg)](https://github.com/anuraag-khare/prompt-fence/actions/workflows/ci.yml)
+[![Python Versions](https://img.shields.io/pypi/pyversions/prompt-fence.svg)](https://pypi.org/project/prompt-fence/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/prompt-fence)](https://pepy.tech/project/prompt-fence)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 A Python SDK (backed by Rust) for establishing cryptographic security boundaries in LLM prompts.
 
 > [!NOTE]
@@ -40,6 +47,16 @@ sdk/
 ### Installation
 
 ```bash
+# Install from PyPI
+pip install prompt-fence
+
+# Or using uv
+uv add prompt-fence
+```
+
+#### Build from Source (Development)
+
+```bash
 # 1. Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -74,6 +91,26 @@ prompt = (
 # 4. Validate at gateway
 if not validate(prompt.to_plain_string(), public_key):
     raise SecurityError("Invalid fence signatures!")
+    raise SecurityError("Invalid fence signatures!")
+```
+
+### Manual Key Generation
+ 
+You can generate valid keys for environment configuration using the library's utility:
+ 
+```bash
+# Generate keypair
+python3 -c "from prompt_fence import generate_keypair; print(generate_keypair())"
+```
+ 
+Set environment variables:
+ 
+```bash
+export PROMPT_FENCE_PRIVATE_KEY="<private_key>"
+export PROMPT_FENCE_PUBLIC_KEY="<public_key>"
+```
+ 
+These are automatically picked up by `PromptBuilder` and `validate()`.
 ```
 
 ## Development & Testing

@@ -1,7 +1,7 @@
 """Tests for prompt_fence builder."""
 
+from prompt_fence import get_awareness_instructions
 from prompt_fence.builder import (
-    DEFAULT_AWARENESS_INSTRUCTIONS,
     FencedPrompt,
     PromptBuilder,
     _iso_timestamp,
@@ -122,13 +122,13 @@ class TestFencedPrompt:
 
 class TestPromptBuilder:
     def test_empty_builder(self):
-        builder = PromptBuilder(prepend_awareness=False)
+        builder = PromptBuilder()
 
         # No segments added, should have empty segments list
         assert len(builder._segments) == 0
 
     def test_trusted_instructions(self):
-        builder = PromptBuilder(prepend_awareness=False)
+        builder = PromptBuilder()
         builder.trusted_instructions("Test instruction", source="system")
 
         assert len(builder._segments) == 1
@@ -139,7 +139,7 @@ class TestPromptBuilder:
         assert segment.source == "system"
 
     def test_untrusted_content(self):
-        builder = PromptBuilder(prepend_awareness=False)
+        builder = PromptBuilder()
         builder.untrusted_content("User input", source="user_upload")
 
         assert len(builder._segments) == 1
@@ -151,7 +151,7 @@ class TestPromptBuilder:
 
     def test_method_chaining(self):
         builder = (
-            PromptBuilder(prepend_awareness=False)
+            PromptBuilder()
             .trusted_instructions("Instruction 1")
             .untrusted_content("Content 1")
             .data_segment("Data 1")
@@ -160,7 +160,7 @@ class TestPromptBuilder:
         assert len(builder._segments) == 3
 
     def test_data_segment_with_rating(self):
-        builder = PromptBuilder(prepend_awareness=False)
+        builder = PromptBuilder()
         builder.data_segment("Some data", rating=FenceRating.PARTIALLY_TRUSTED)
 
         segment = builder._segments[0]
@@ -168,7 +168,7 @@ class TestPromptBuilder:
         assert segment.rating == FenceRating.PARTIALLY_TRUSTED
 
     def test_custom_segment(self):
-        builder = PromptBuilder(prepend_awareness=False)
+        builder = PromptBuilder()
         builder.custom_segment(
             text="Custom",
             fence_type=FenceType.CONTENT,
@@ -195,7 +195,8 @@ class TestIsoTimestamp:
 
 class TestAwarenessInstructions:
     def test_default_instructions_exist(self):
-        assert DEFAULT_AWARENESS_INSTRUCTIONS is not None
-        assert "CRITICAL SECURITY RULES" in DEFAULT_AWARENESS_INSTRUCTIONS
-        assert "untrusted" in DEFAULT_AWARENESS_INSTRUCTIONS
-        assert "trusted" in DEFAULT_AWARENESS_INSTRUCTIONS
+        instructions = get_awareness_instructions()
+        assert instructions is not None
+        assert "CRITICAL SECURITY RULES" in instructions
+        assert "untrusted" in instructions
+        assert "trusted" in instructions
