@@ -140,6 +140,15 @@ cd python/
 uv run maturin build --release
 ```
 
+
+## Roadmap
+
+- [ ] Async IO support (non-blocking validation for high-throughput)
+- [ ] Key rotation support
+- [ ] Integration with LangChain / LlamaIndex
+- [ ] Integration with OpenAI SDK
+- [ ] Integration with Google ADK SDK
+
 ## License
 
 MIT License

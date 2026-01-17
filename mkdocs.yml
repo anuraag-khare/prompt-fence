@@ -37,4 +37,13 @@ plugins:
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - Installation & Quick Start: getting-started.md
+    - Key Management: key-management.md
+    - Configuration: configuration.md
+  - User Guide:
+    - Building Prompts: building-prompts.md
+    - Validation & Security: validation.md
+  - Advanced:
+    - Under the Hood: advanced.md
   - API Reference: api.md
