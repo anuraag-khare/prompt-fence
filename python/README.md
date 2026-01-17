@@ -23,8 +23,6 @@ The SDK uses Ed25519 signatures with SHA-256 hashing, implemented in Rust for pe
 
 ## Installation
 
-## Installation
-
 ### From PyPI
 
 ```bash
@@ -42,31 +40,6 @@ cd python/
 # Using uv (required)
 uv sync
 uv run maturin develop
-```
-
-### Build Distributable Wheels
-
-```bash
-# Build release wheel for current platform
-uv run maturin build --release
-
-# Wheel will be in: target/wheels/prompt_fence-0.1.0-cp39-cp39-*.whl
-
-# Install the wheel
-uv pip install ../rust/target/wheels/prompt_fence-*.whl
-```
-
-### Build for Multiple Platforms
-
-```bash
-# Build for specific Python versions
-uv run maturin build --release -i python3.9 -i python3.10 -i python3.11 -i python3.12
-
-# Build universal2 wheel for macOS (both Intel and Apple Silicon)
-uv run maturin build --release --target universal2-apple-darwin
-
-# Cross-compile for Linux (requires Docker or zig)
-uv run maturin build --release --target x86_64-unknown-linux-gnu
 ```
 
 ## Quick Start
