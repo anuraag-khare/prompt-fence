@@ -883,20 +883,20 @@
 </ol>
 <h2 id="validating-a-prompt">Validating a Prompt</h2>
 <p>Use the <code>validate()</code> function to check an entire prompt string.</p>
-<pre><code class="language-python">from prompt_fence import validate
-
-# prompt_str = ... received from network ...
-is_valid = validate(prompt_str, public_key)
-
-if is_valid:
-    # All fences are intact and signatures match.
-    # The structure of the prompt is exactly as signed.
-    proceed()
-else:
-    # ALARM! Someone tampered with the prompt or
-    # tried to forge a trusted instruction.
-    block_request()
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">prompt_fence</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># prompt_str = ... received from network ...</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">is_valid</span> <span class="o">=</span> <span class="n">validate</span><span class="p">(</span><span class="n">prompt_str</span><span class="p">,</span> <span class="n">public_key</span><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">if</span> <span class="n">is_valid</span><span class="p">:</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="c1"># All fences are intact and signatures match.</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="c1"># The structure of the prompt is exactly as signed.</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">proceed</span><span class="p">()</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="c1"># ALARM! Someone tampered with the prompt or</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="c1"># tried to forge a trusted instruction.</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">block_request</span><span class="p">()</span>
+</code></pre></div>
 <h3 id="protocol">Protocol</h3>
 <p>The validation protocol follows <strong>Definition 4.5</strong> from the Prompt Fence paper:</p>
 <blockquote>
@@ -905,19 +905,19 @@ else:
 <p>This ensures a fail-safe default.</p>
 <h2 id="inspecting-fences">Inspecting Fences</h2>
 <p>If you need deeper inspection—for example, to log <em>which</em> specific user caused a validation failure—you can use <code>validate_fence()</code> on individual XML blocks.</p>
-<pre><code class="language-python">from prompt_fence import validate_fence, VerificationResult
-
-# Assume you extracted a regex match for &lt;sec:fence&gt;...&lt;/sec:fence&gt;
-fence_xml = &quot;&lt;sec:fence&gt;...&lt;/sec:fence&gt;&quot;
-
-result: VerificationResult = validate_fence(fence_xml, public_key)
-
-if result.valid:
-    print(f&quot;Authorized content from: {result.source}&quot;)
-    print(f&quot;Trust Rating: {result.rating}&quot;)
-else:
-    print(f&quot;Validation failed: {result.error}&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">prompt_fence</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_fence</span><span class="p">,</span> <span class="n">VerificationResult</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Assume you extracted a regex match for &lt;sec:fence&gt;...&lt;/sec:fence&gt;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">fence_xml</span> <span class="o">=</span> <span class="s2">&quot;&lt;sec:fence&gt;...&lt;/sec:fence&gt;&quot;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">result</span><span class="p">:</span> <span class="n">VerificationResult</span> <span class="o">=</span> <span class="n">validate_fence</span><span class="p">(</span><span class="n">fence_xml</span><span class="p">,</span> <span class="n">public_key</span><span class="p">)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Authorized content from: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trust Rating: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation failed: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="handling-fence-errors">Handling Fence Errors</h2>
 <p>The SDK provides <code>FenceError</code> and <code>CryptoError</code> for handling exceptions during the signing or validation process, though the high-level <code>validate</code> function typically returns a boolean <code>False</code> for simplicity.</p>
 

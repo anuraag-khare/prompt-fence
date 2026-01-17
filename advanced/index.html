@@ -956,17 +956,17 @@
 <p>Prompt Fence isn't magic; it's a strongly-typed signature scheme applied to string data.</p>
 <h3 id="the-xml-structure">The XML Structure</h3>
 <p>When you call <code>.build()</code>, the SDK wraps your content in XML tags.</p>
-<pre><code class="language-xml">&lt;sec:fence
-    id=&quot;sig_...&quot;
-    type=&quot;Instructions&quot;
-    rating=&quot;Trusted&quot;
-    source=&quot;system&quot;
-    ts=&quot;2025-01-17T...&quot;
-    sig=&quot;...Ed25519_Signature...&quot;
-&gt;
-    Your Content Here
-&lt;/sec:fence&gt;
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;sec:fence</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="na">id=</span><span class="s">&quot;sig_...&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="na">type=</span><span class="s">&quot;Instructions&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="na">rating=</span><span class="s">&quot;Trusted&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="na">source=</span><span class="s">&quot;system&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="na">ts=</span><span class="s">&quot;2025-01-17T...&quot;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="na">sig=</span><span class="s">&quot;...Ed25519_Signature...&quot;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>Your<span class="w"> </span>Content<span class="w"> </span>Here
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nt">&lt;/sec:fence&gt;</span>
+</code></pre></div>
 <ul>
 <li><code>sec:fence</code>: The namespaced tag used to avoid collisions with normal HTML/XML.</li>
 <li><code>id</code>: A unique identifier for the segment.</li>
@@ -983,11 +983,11 @@
 <h2 id="gotchas-common-mistakes">Gotchas &amp; Common Mistakes</h2>
 <h3 id="1-modifying-the-string">1. Modifying the String</h3>
 <p><strong>Never</strong> modify the prompt string after it's built.</p>
-<pre><code class="language-python"># ❌ INCORRECT
-prompt = builder.build(key)
-modified = prompt + &quot;\n\nPlease answer.&quot; 
-# This breaks the awareness instructions context or might be interpreted outside a fence.
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># ❌ INCORRECT</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">prompt</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">modified</span> <span class="o">=</span> <span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Please answer.&quot;</span> 
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># This breaks the awareness instructions context or might be interpreted outside a fence.</span>
+</code></pre></div>
 <p>While appending <em>outside</em> a fence doesn't invalidate the individual fence signatures, it weakens the security model because the LLM sees content that isn't fenced.</p>
 <h3 id="2-key-exposure">2. Key Exposure</h3>
 <p>If your private key leaks, an attacker can sign malicious prompts that look trusted.</p>

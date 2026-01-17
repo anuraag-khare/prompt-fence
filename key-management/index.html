@@ -912,16 +912,16 @@
 <h2 id="generating-keys">Generating Keys</h2>
 <h3 id="in-code-development">In Code (Development)</h3>
 <p>You can generate ephemeral keys for testing directly in Python:</p>
-<pre><code class="language-python">from prompt_fence import generate_keypair
-
-private_key, public_key = generate_keypair()
-print(f&quot;Private: {private_key}&quot;)
-print(f&quot;Public:  {public_key}&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">prompt_fence</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_keypair</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">private_key</span><span class="p">,</span> <span class="n">public_key</span> <span class="o">=</span> <span class="n">generate_keypair</span><span class="p">()</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Private: </span><span class="si">{</span><span class="n">private_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Public:  </span><span class="si">{</span><span class="n">public_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h3 id="using-cli-one-liner-production-setup">Using CLI One-Liner (Production Setup)</h3>
 <p>For production, you typically want to generate keys once and inject them as environment variables. You can use this one-liner:</p>
-<pre><code class="language-bash">python3 -c &quot;from prompt_fence import generate_keypair; p, pub = generate_keypair(); print(f'Private: {p}\nPublic:  {pub}')&quot;
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from prompt_fence import generate_keypair; p, pub = generate_keypair(); print(f&#39;Private: {p}\nPublic:  {pub}&#39;)&quot;</span>
+</code></pre></div>
 <h2 id="storing-keys">Storing Keys</h2>
 <h3 id="environment-variables">Environment Variables</h3>
 <p>The SDK automatically looks for these environment variables if you don't pass keys explicitly:</p>
@@ -930,15 +930,14 @@ print(f&quot;Public:  {public_key}&quot;)
 <li><code>PROMPT_FENCE_PUBLIC_KEY</code>: Used by <code>validate()</code> and <code>validate_fence()</code></li>
 </ul>
 <p><strong>Example <code>.env</code> file:</strong></p>
-<pre><code class="language-bash">PROMPT_FENCE_PRIVATE_KEY=&quot;&lt;base64_private_key&gt;&quot;
-PROMPT_FENCE_PUBLIC_KEY=&quot;&lt;base64_public_key&gt;&quot;
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">PROMPT_FENCE_PRIVATE_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;base64_private_key&gt;&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nv">PROMPT_FENCE_PUBLIC_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;base64_public_key&gt;&quot;</span>
+</code></pre></div>
 <h3 id="best-practices">Best Practices</h3>
 <ol>
 <li><strong>Secret Management</strong>: Never hardcode keys in your source code. Use a secrets manager (e.g., AWS Secrets Manager, HashiCorp Vault, GitHub Secrets).</li>
 <li><strong>Least Privilege</strong>: The component that <em>builds</em> prompts needs the <strong>Private Key</strong>. The component that <em>validates</em> prompts (e.g., the checking gateway) only needs the <strong>Public Key</strong>.</li>
-<li><strong>Rotation</strong>: Periodically rotate your keys. Since the signatures are ephemeral (per request), key rotation is straightforward—just update the configuration on your builder and validator services.
-```</li>
+<li><strong>Rotation</strong>: Periodically rotate your keys. Since the signatures are ephemeral (per request), key rotation is straightforward—just update the configuration on your builder and validator services.</li>
 </ol>
 
 
