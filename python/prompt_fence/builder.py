@@ -22,6 +22,13 @@ class FencedPrompt:
         print(prompt)  # Uses __str__, includes fence-aware instructions
         llm_call(prompt.to_plain_string())  # Explicit str for other SDKs
         ```
+
+    Attributes:
+        segments (list[FenceSegment]): Copy of all segments in order.
+        trusted_segments (list[FenceSegment]): Subset of trusted segments.
+        untrusted_segments (list[FenceSegment]): Subset of untrusted segments.
+        partially_trusted_segments (list[FenceSegment]): Subset of partially trusted segments.
+        has_awareness_instructions (bool): Whether security instructions are prepended.
     """
 
     def __init__(
@@ -55,6 +62,11 @@ class FencedPrompt:
         return [s for s in self._segments if s.rating == FenceRating.UNTRUSTED]
 
     @property
+    def partially_trusted_segments(self) -> list[FenceSegment]:
+        """Get all partially trusted fence segments."""
+        return [s for s in self._segments if s.rating == FenceRating.PARTIALLY_TRUSTED]
+
+    @property
     def has_awareness_instructions(self) -> bool:
         """Check if fence-awareness instructions are included."""
         return self._awareness_instructions is not None
@@ -80,6 +92,11 @@ class FencedPrompt:
 
         Returns:
             The complete fenced prompt as a plain str.
+
+        Note:
+            The result is cached after the first call. If you (incorrectly) modify
+            the internal state of `segments` after this call, the string representation
+            will not update. Use the builder pattern to ensure immutability.
         """
         if self._cached_string is None:
             self._cached_string = self._build_string()

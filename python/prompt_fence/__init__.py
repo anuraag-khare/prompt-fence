@@ -124,6 +124,11 @@ def validate(prompt: str | FencedPrompt, public_key: str | None = None) -> bool:
     Returns:
         True if ALL fences have valid signatures, False otherwise.
 
+    Note:
+        When passing a `FencedPrompt` object, this function uses its **cached**
+        string representation (`to_plain_string()`). Ensure the object matches
+        your intended state before validation.
+
     Example:
         ```python
         if validate(prompt_string):

@@ -87,7 +87,14 @@ raw_prompt = prompt.to_plain_string()
 # Inspect segments
 for segment in prompt.segments:
     print(f"[{segment.rating}] {segment.source}: {len(segment.content)} chars")
+
+# Access specific trust levels
+trusted = prompt.trusted_segments
+untrusted = prompt.untrusted_segments
+partially_trusted = prompt.partially_trusted_segments
 ```
+
+> **Note**: The string representation (`str(prompt)` or `.to_plain_string()`) is **cached** after the first access for performance. Since `FenceSegment` objects are immutable, this is generally safe, but avoid trying to hack internal lists.
 
 ## Advanced Examples
 
