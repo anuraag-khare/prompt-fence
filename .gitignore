@@ -37,6 +37,7 @@ venv/
 .venv/
 env/
 .env/
+.env
 
 # Rust
 target/

@@ -113,8 +113,8 @@ def validate(prompt: str | FencedPrompt, public_key: str | None = None) -> bool:
     """Validate all fences in a prompt string.
 
     This is the security gateway function that verifies cryptographic
-    signatures on all fence segments. Per the paper's Definition 4.5:
-    "If any fence fails verification, the entire prompt is rejected."
+    signatures on all fence segments. If any fence fails verification,
+    the entire prompt is rejected (secure-by-default).
 
     Args:
         prompt: The complete fenced prompt string or FencedPrompt object.
@@ -123,6 +123,11 @@ def validate(prompt: str | FencedPrompt, public_key: str | None = None) -> bool:
 
     Returns:
         True if ALL fences have valid signatures, False otherwise.
+
+    Note:
+        When passing a `FencedPrompt` object, this function uses its **cached**
+        string representation (`to_plain_string()`). Ensure the object matches
+        your intended state before validation.
 
     Example:
         ```python

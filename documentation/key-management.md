@@ -46,3 +46,26 @@ PROMPT_FENCE_PUBLIC_KEY="<base64_public_key>"
 2.  **Least Privilege**: The component that *builds* prompts needs the **Private Key**. The component that *validates* prompts (e.g., the checking gateway) only needs the **Public Key**.
 3.  **Rotation**: Periodically rotate your keys. Since the signatures are ephemeral (per request), key rotation is straightforward—just update the configuration on your builder and validator services.
 
+## Troubleshooting & Edge Cases
+
+### Common Key Errors
+
+The SDK raises `prompt_fence.CryptoError` for most key issues.
+
+| Issue | Resulting Error |
+| :--- | :--- |
+| **Empty String** | `Invalid private key format: Expected 32 bytes, got 0` |
+| **Invalid Base64** | `Base64 decode error: ...` |
+| **Wrong Length** | `Invalid private key format: Expected 32 bytes, got X` |
+
+### Key Confusion Pitfall
+
+!!! failure "Public Key as Private Key"
+    **Technically Possible, Logically Fatal**
+    
+    Ed25519 "Private Keys" are just 32 bytes of random seed data. Consequently, if you accidentally pass your **Public Key** (which is also 32 bytes) into the `private_key` argument of `PromptBuilder`, the SDK **will not error**.
+    
+    It will successfully sign the prompt using your public key as the seed. However, `validate()` will correctly **FAIL** because the signature won't match the actual public key.
+    
+    *Always verify you are using the correct variable.*
+

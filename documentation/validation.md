@@ -29,6 +29,9 @@ else:
     block_request()
 ```
 
+!!! warning "Validation and Caching"
+    When you pass a `FencedPrompt` object directly to `validate()`, the function uses the **cached string representation** of that object. This ensures you validate exactly what `to_plain_string()` returns, but be aware that modifying the internal `segments` list of a `FencedPrompt` (which you shouldn't do anyway) won't invalidate the cache.
+
 ### Protocol
 
 The validation protocol follows **Definition 4.5** from the Prompt Fence paper:

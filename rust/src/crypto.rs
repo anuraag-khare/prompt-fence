@@ -1,7 +1,7 @@
 //! Cryptographic signing and verification for Prompt Fencing.
 #![allow(clippy::useless_conversion)]
 //!
-//! Implements Ed25519 signatures with SHA-256 hashing per the paper:
+//! Implements Ed25519 signatures with SHA-256 hashing:
 //! - σ = Sign(SK, H(C || M_canonical))
 //! - Verification uses the same deterministic process
 
@@ -53,7 +53,7 @@ pub fn generate_keypair() -> (String, String) {
 }
 
 /// Compute the signature input hash: SHA-256(content || metadata_canonical).
-/// Per paper Definition 4.3: σ = Sign(SK, H(C || M_canonical))
+/// σ = Sign(SK, H(C || M_canonical))
 fn compute_signature_hash(content: &str, metadata: &FenceMetadata) -> [u8; 32] {
     let canonical = metadata.canonicalize();
     let mut hasher = Sha256::new();
@@ -177,7 +177,7 @@ pub fn verify_fence(
 
 /// Verify all fences in a fenced prompt string.
 /// Returns true only if ALL fences have valid signatures.
-/// Per paper Definition 4.5: "If any fence fails verification, the entire prompt is rejected"
+/// "If any fence fails verification, the entire prompt is rejected"
 #[pyfunction]
 pub fn verify_all_fences(prompt: String, public_key: String) -> PyResult<bool> {
     let fences = extract_fence_xmls(&prompt);
