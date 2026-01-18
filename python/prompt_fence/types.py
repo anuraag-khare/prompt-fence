@@ -28,7 +28,7 @@ class FenceRating(str, Enum):
     PARTIALLY_TRUSTED = "partially-trusted"
 
 
-@dataclass
+@dataclass(frozen=True)
 class FenceSegment:
     """A fenced prompt segment with metadata and signature.
 
