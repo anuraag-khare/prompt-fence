@@ -506,6 +506,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting &amp; Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting &amp; Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-key-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Key Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-confusion-pitfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Confusion Pitfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -887,6 +926,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting &amp; Edge Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting &amp; Edge Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-key-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Key Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-confusion-pitfall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Confusion Pitfall
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -939,6 +1017,39 @@
 <li><strong>Least Privilege</strong>: The component that <em>builds</em> prompts needs the <strong>Private Key</strong>. The component that <em>validates</em> prompts (e.g., the checking gateway) only needs the <strong>Public Key</strong>.</li>
 <li><strong>Rotation</strong>: Periodically rotate your keys. Since the signatures are ephemeral (per request), key rotation is straightforward—just update the configuration on your builder and validator services.</li>
 </ol>
+<h2 id="troubleshooting-edge-cases">Troubleshooting &amp; Edge Cases</h2>
+<h3 id="common-key-errors">Common Key Errors</h3>
+<p>The SDK raises <code>prompt_fence.CryptoError</code> for most key issues.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Issue</th>
+<th style="text-align: left;">Resulting Error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Empty String</strong></td>
+<td style="text-align: left;"><code>Invalid private key format: Expected 32 bytes, got 0</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Invalid Base64</strong></td>
+<td style="text-align: left;"><code>Base64 decode error: ...</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Wrong Length</strong></td>
+<td style="text-align: left;"><code>Invalid private key format: Expected 32 bytes, got X</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-confusion-pitfall">Key Confusion Pitfall</h3>
+<div class="admonition failure">
+<p class="admonition-title">Public Key as Private Key</p>
+<p><strong>Technically Possible, Logically Fatal</strong></p>
+<p>Ed25519 "Private Keys" are just 32 bytes of random seed data. Consequently, if you accidentally pass your <strong>Public Key</strong> (which is also 32 bytes) into the <code>private_key</code> argument of <code>PromptBuilder</code>, the SDK <strong>will not error</strong>.</p>
+<p>It will successfully sign the prompt using your public key as the seed. However, <code>validate()</code> will correctly <strong>FAIL</strong> because the signature won't match the actual public key.</p>
+<p><em>Always verify you are using the correct variable.</em></p>
+</div>
 
 
 

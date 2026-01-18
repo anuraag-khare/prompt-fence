@@ -897,6 +897,10 @@
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="c1"># tried to forge a trusted instruction.</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">block_request</span><span class="p">()</span>
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Validation and Caching</p>
+<p>When you pass a <code>FencedPrompt</code> object directly to <code>validate()</code>, the function uses the <strong>cached string representation</strong> of that object. This ensures you validate exactly what <code>to_plain_string()</code> returns, but be aware that modifying the internal <code>segments</code> list of a <code>FencedPrompt</code> (which you shouldn't do anyway) won't invalidate the cache.</p>
+</div>
 <h3 id="protocol">Protocol</h3>
 <p>The validation protocol follows <strong>Definition 4.5</strong> from the Prompt Fence paper:</p>
 <blockquote>
