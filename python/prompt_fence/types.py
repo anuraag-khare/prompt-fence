@@ -7,9 +7,8 @@ from enum import Enum
 
 
 class FenceType(str, Enum):
-    """Content type for fenced segments.
-
-    Per paper Section 4.2: type ∈ {instructions, content, data}
+    """Standardized content type for fenced segments.
+    Values: {instructions, content, data}
     """
 
     INSTRUCTIONS = "instructions"
@@ -18,9 +17,8 @@ class FenceType(str, Enum):
 
 
 class FenceRating(str, Enum):
-    """Trust rating for fenced segments.
-
-    Per paper Section 4.2: rating ∈ {trusted, untrusted, partially-trusted}
+    """Standardized trust rating for fenced segments.
+    Values: {trusted, untrusted, partially-trusted}
     """
 
     TRUSTED = "trusted"

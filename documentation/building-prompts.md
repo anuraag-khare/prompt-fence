@@ -94,7 +94,29 @@ untrusted = prompt.untrusted_segments
 partially_trusted = prompt.partially_trusted_segments
 ```
 
-> **Note**: The string representation (`str(prompt)` or `.to_plain_string()`) is **cached** after the first access for performance. Since `FenceSegment` objects are immutable, this is generally safe, but avoid trying to hack internal lists.
+> **Note**: The string representation (`str(prompt)` or `.to_plain_string()`) is **cached** after the first access for performance.
+> 
+> *   **Immutability**: Individual `FenceSegment` objects are **frozen (immutable)**. You cannot modify their content or rating after creation.
+> *   **Thread Safety**: The `FencedPrompt` object is thread-safe for reading and string conversion.
+
+### String Conversion & Concatenation
+
+The `FencedPrompt` object implements Python's string magic methods, so it integrates seamlessly with existing code:
+
+```python
+# 1. Direct concatenation works
+intro = "Here is a secured prompt:\n\n"
+full_text = intro + prompt + "\n\nAnswer:"
+
+# 2. F-strings work
+print(f"Sending prompt of length {len(prompt)}")
+
+# 3. Pass directly to functions expecting strings
+def count_tokens(text: str):
+    return len(text.split())
+
+count = count_tokens(prompt)
+```
 
 ## Advanced Examples
 

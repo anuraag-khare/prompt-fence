@@ -7,7 +7,7 @@
 
 **Secure your specific LLM prompts with cryptographic boundaries.**
 
-Prompt Fence is a Python SDK (backed by high-performance Rust) that implements **Cryptographic Security Boundaries** for Large Language Models. It allows you to mathematically prove which parts of a prompt came from your trusted system and which parts came from untrusted users.
+The Prompt Fence SDK provides an easy-to-use API for implementing cryptographic trust boundaries in LLM applications. It allows you to mathematically prove which parts of a prompt came from your trusted system and which parts came from untrusted users.
 
 > [!NOTE]
 > This is an **unofficial implementation** of the concept described in the paper [Prompt Fence: A Cryptographic Approach to Establishing Security Boundaries in Large Language Model Prompts](https://arxiv.org/abs/2511.19727).
