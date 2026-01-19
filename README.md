@@ -14,9 +14,13 @@ A Python SDK (backed by Rust) for establishing cryptographic security boundaries
 
 **Paper**: [Prompt Fence: A Cryptographic Approach to Establishing Security Boundaries in Large Language Model Prompts](https://arxiv.org/abs/2511.19727)
 
-**Documentation**: [https://anuraag-khare.github.io/prompt-fence/](https://anuraag-khare.github.io/prompt-fence/)
+## Documentation: 
+
+[![Documentation](https://img.shields.io/badge/Read%20the%20Docs-Prompt%20Fence-blue?style=for-the-badge&logo=readthedocs)](https://anuraag-khare.github.io/prompt-fence/)
 
 ## Overview
+
+![Prompt Fence Architecture](documentation/Prompt_fence_arch.jpg)
 
 Prompt Fence prevents prompt injection attacks by:
 1. **Wrapping segments** in cryptographically signed XML fences
